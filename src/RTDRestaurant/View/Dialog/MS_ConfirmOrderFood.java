@@ -64,7 +64,7 @@ public class MS_ConfirmOrderFood extends javax.swing.JDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 try {
-                    service.InsertCTHD(ID_HoaDon, monan.getId(), soluong);
+                    service.InsertCTHD(ID_HoaDon, monan, soluong);
                 } catch (SQLException ex) {
                     Logger.getLogger(AccountC_Form.class.getName()).log(Level.SEVERE, null, ex);
                 }

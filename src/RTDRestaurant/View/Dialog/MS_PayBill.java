@@ -65,13 +65,16 @@ public class MS_PayBill extends javax.swing.JDialog {
             lbDate.setText("Ngày: "+hoadon.getNgayHD());
             txtTienMonAn.setText(df.format(hoadon.getTienMonAn())+"đ");
             txtTienGiam.setText(df.format(hoadon.getTienGiam())+"đ");
-            txtTotal.setText(df.format(hoadon.getTongtien())+"đ");
+            int total = 0;
             //Lấy danh sách CTHD từ hóa đơn tham số
             ArrayList<ModelCTHD> listCTHD=service.getCTHD(hoadon.getIdHoaDon());
             for(ModelCTHD data:listCTHD){
                 cthd.addRow(new Object[]{data.getTenMonAn(), data.getSoluong(), df.format(data.getThanhTien())+"đ"});
+                total += data.getThanhTien();
             }
-            
+            txtTienMonAn.setText(df.format(total)+"đ");
+            txtTotal.setText(df.format(total-hoadon.getTienGiam())+"đ");
+
             animator.start();
          
             setVisible(true);

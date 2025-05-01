@@ -237,8 +237,8 @@ public class ServiceCustomer {
        
         //Thêm Hoá Đơn mới
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-YYYY");
-        String sql = "INSERT INTO HoaDon(ID_HoaDon, ID_KH, ID_Ban, NgayHD, TienMonAn, TienGiam, Trangthai) "
-                + "VALUES (?, ?, ?, STR_TO_DATE(?, '%d-%m-%Y'), 0, 0, 'Chua thanh toan')";
+        String sql = "INSERT INTO HoaDon(ID_HoaDon, ID_KH, ID_Ban, NgayHD, TienMonAn, TienGiam,Tongtien, Trangthai) "
+                + "VALUES (?, ?, ?, STR_TO_DATE(?, '%d-%m-%Y'), 0, 0,0 , 'Chua thanh toan')";
         PreparedStatement p = con.prepareStatement(sql);
         p.setInt(1, idHD);
         p.setInt(2, customer.getID_KH());
@@ -278,7 +278,8 @@ public class ServiceCustomer {
     }
 
     //Thêm món ăn mới khách hàng vừa đặt vào CTHD
-    public void InsertCTHD(int ID_HoaDon, int ID_MonAn, int soluong) throws SQLException {
+    public void InsertCTHD(int ID_HoaDon, ModelMonAn monan, int soluong) throws SQLException {
+        int ID_MonAn= monan.getId();
         //Kiểm tra món ăn đã có trong CTHD hay chưa, nếu đã có cập nhật số lượng, nếu chưa thì thêm CTHD mới
         String sql = "SELECT 1 FROM CTHD WHERE ID_HoaDon=? AND ID_MonAn=?";
         PreparedStatement p = con.prepareStatement(sql);
@@ -286,24 +287,27 @@ public class ServiceCustomer {
         p.setInt(2, ID_MonAn);
         ResultSet r = p.executeQuery();
         if (r.next()) {
-            // Nếu tồn tại 
-            String sql_update = "UPDATE CTHD SET SoLuong=SoLuong+? WHERE ID_HoaDon=? AND ID_MonAn=?";
+            // Nếu đã tồn tại -> cập nhật SoLuong và ThanhTien
+            String sql_update = "UPDATE CTHD SET SoLuong = SoLuong + ?, ThanhTien = ThanhTien + ? WHERE ID_HoaDon = ? AND ID_MonAn = ?";
             PreparedStatement p1 = con.prepareStatement(sql_update);
             p1.setInt(1, soluong);
-            p1.setInt(2, ID_HoaDon);
-            p1.setInt(3, ID_MonAn);
+            p1.setInt(2, monan.getValue() * soluong); // cập nhật thêm ThanhTien
+            p1.setInt(3, ID_HoaDon);
+            p1.setInt(4, ID_MonAn);
             p1.execute();
             p1.close();
         } else {
-            //Nếu không tồn tại
-            String sql_insert = "INSERT INTO CTHD(ID_HoaDon,ID_MonAn,SoLuong) VALUES (?,?,?)";
+            // Nếu chưa tồn tại -> thêm mới
+            String sql_insert = "INSERT INTO CTHD(ID_HoaDon, ID_MonAn, SoLuong, ThanhTien) VALUES (?, ?, ?, ?)";
             PreparedStatement p1 = con.prepareStatement(sql_insert);
             p1.setInt(1, ID_HoaDon);
             p1.setInt(2, ID_MonAn);
             p1.setInt(3, soluong);
+            p1.setInt(4, monan.getValue() * soluong);
             p1.execute();
             p1.close();
         }
+
         p.close();
         r.close();
     }
